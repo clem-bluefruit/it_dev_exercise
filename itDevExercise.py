@@ -8,6 +8,7 @@ class TimeSheet:
         self._api_response = json.loads(requests.get(_api_uri).text)
         self._headers = []
         self._list_items = {}
+        self.dates = []
         self._buildHeaders()
 
     def _buildHeaders(self):
@@ -33,6 +34,8 @@ class TimeSheet:
             entryDate = str(firstDay.strftime("%Y-%m-%d"))
             self._append_job(entryDate, project)
             firstDay += numDays
+            if entryDate not in self.dates:
+                self.dates.append(entryDate)
 
     def _print_header(self):
         _header_text = ""
@@ -48,22 +51,29 @@ class TimeSheet:
             self._process_date_range(_start_date, _end_date, _project_name)
         else:
             self._append_job(_start_date, _project_name)
+            if _start_date not in self.dates:
+                self.dates.append(_start_date)
+        self.dates.sort()
 
     def generate_csv(self):
         _csv_string = "date,"
         _csv_string += self._print_header()
         for job in self._api_response:
             self._process_job(job)
-        for row in self._list_items:
+        for row in self.dates:
             _csv_string += row
             for project in self._headers:
                 _csv_string += "," + str(self._list_items[row][project])
             _csv_string += "\n"
+        self.dates.sort()
         return _csv_string
 
     def send_response(self, payload):
-        _headers = {'upload-key': '95341ee6-4efc-4148-9619-b4b800b9eeb6'}
-        put_response = requests.put("https://accounts.bluefruit.software/upload/51m0nt35t.csv", headers=_headers, data=json.dumps(payload))
+        _headers = {
+            'Content-type': 'text/csv',
+            'upload-key': '95341ee6-4efc-4148-9619-b4b800b9eeb6'
+        }
+        put_response = requests.put("https://accounts.bluefruit.software/upload/51m0nt35t.csv", headers=_headers, data=payload)
         print(put_response.json())
 
 
