@@ -73,7 +73,9 @@ class TimeSheet:
             'Content-type': 'text/csv',
             'upload-key': '95341ee6-4efc-4148-9619-b4b800b9eeb6'
         }
-        put_response = requests.put("https://accounts.bluefruit.software/upload/51m0nt35t.csv", headers=_headers, data=payload)
+        put_response = requests.put(
+            "https://accounts.bluefruit.software/upload/51m0nt35t.csv",
+            headers=_headers, data=payload)
         print(put_response.json())
 
 
